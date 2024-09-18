@@ -1,5 +1,5 @@
-import Conversation from "../models/conversation.model";
-
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 /**
  * Handles sending a message from one user to another
  * Creates a new conversation if one does not exist between the two users
@@ -45,6 +45,12 @@ export const sendMessage = async(req, res) => {
   }  
 };
 
+/**
+ * Gets all the messages for a conversation between two users
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise} A promise that resolves to a json response with the messages
+ */
 export const getMessages = async(req, res) => {
   try {
     const {id:userToChatId} = req.params;

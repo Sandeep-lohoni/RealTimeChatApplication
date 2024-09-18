@@ -1,5 +1,16 @@
 import jwt from "jsonwebtoken";
-
+import User from "../models/user.model.js";
+/**
+ * Protects a route by verifying the JWT token sent in the request cookies.
+ * If the token is invalid, or the user is not found, a 401 Unauthorized response is sent.
+ * If a valid token is found, the user is found and attached to the request object as req.user
+ * and the next() function is called.
+ * @function
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @param {Function} next - The next function in the middleware chain
+ * @returns {Promise} A promise that resolves to a json response with a success message
+ */
 const protectRoute = async(req, res, next) => {
     try {
         const token = req.cookies.jwt;
@@ -14,6 +25,10 @@ const protectRoute = async(req, res, next) => {
 
         const user = await User.findById(decoded.userId).select("-password");
 
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
+
         req.user = user;
         next();
 
@@ -23,4 +38,4 @@ const protectRoute = async(req, res, next) => {
     }
 }
 
-export default protectRoute
+export default protectRoute;
