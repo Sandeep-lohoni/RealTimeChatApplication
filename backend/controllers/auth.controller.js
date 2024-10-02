@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
 
         const user = await User.findOne({ username });
 
-        if (user) return res.status(400).json({ error: "User already exists" });
+        if (user) return res.status(400).json({ error: "Username already exists" });
 
         // Hash password
         const salt = await bcrypt.genSalt(10);
@@ -37,8 +37,8 @@ export const signup = async (req, res) => {
             username,
             password: hashedPassword,
             gender,
-            profilePic: gender === "male" ? boyProfilePic : girlProfilePic
-        })
+            profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+        });
 
         if(newUser){
             // generate jwt token
@@ -49,19 +49,19 @@ export const signup = async (req, res) => {
                 _id: newUser._id,
                 fullName: newUser.fullName,
                 username: newUser.username,
-                profilePic: newUser.profilePic
+                profilePic: newUser.profilePic,
             });
         }
         else{
-            res.status(400).json({ error: "User not created" });
+            res.status(400).json({ error: "Invalid user data" });
         }
 
     } catch (error) {
-        console.log("Error: ", error.message);
-        res.status(500).json({ error:"Server error" });
+        console.log("Error in signup contoller: ", error.message);
+        res.status(500).json({ error:"InternalServer Error" });
     }
 
-}
+};
 
         /**
          * Handles logging in a user
@@ -90,14 +90,14 @@ export const login = async(req, res) => {
             _id: user._id,
             fullName: user.fullName,
             username: user.username,
-            profilePic: user.profilePic
+            profilePic: user.profilePic,
         });
 
     } catch (error) {
-        console.log("Error in login ", error.message);
-        res.status(500).json({ error: " Server error" });
+        console.log("Error in login controller", error.message);
+        res.status(500).json({ error: "Internal Server error" });
     }
-}
+};
 
         /**
          * Handles logging out a user
@@ -116,4 +116,4 @@ export const logout = async(req, res) => {
         console.log("Error in logout controller ", error);
         res.status(500).json({ error:"Server error" });
     }
-}
+};
