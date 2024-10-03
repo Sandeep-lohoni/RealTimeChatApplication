@@ -5,12 +5,7 @@ import User from "../models/user.model.js";
  * If the token is invalid, or the user is not found, a 401 Unauthorized response is sent.
  * If a valid token is found, the user is found and attached to the request object as req.user
  * and the next() function is called.
- * @function
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- * @param {Function} next - The next function in the middleware chain
- * @returns {Promise} A promise that resolves to a json response with a success message
- */
+ **/
 const protectRoute = async(req, res, next) => {
     try {
         const token = req.cookies.jwt;
