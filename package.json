@@ -1,10 +1,12 @@
 {
   "name": "realtimechatapplication",
   "version": "1.0.0",
-  "description": "![Demo App](https://i.ibb.co/fXmZdnz/Screenshot-10.png)",
-  "main": "index.js",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "server": "nodemon backend/server.js"
+    "server": "nodemon backend/server.js",
+    "start": "node backend/server.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "type": "module",
   "keywords": [],

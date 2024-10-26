@@ -1,43 +1,38 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
-/**
- * Handles sending a message from one user to another
- * Creates a new conversation if one does not exist between the two users
- * Adds the message to the conversation
- * Saves the conversation and the message
- * Returns a success message and status code
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- * @returns {Promise} A promise that resolves to a json response with a success message
- */
-export const sendMessage = async(req, res) => {
+
+export const sendMessage = async (req, res) => {
   try {
-    const {message} = req.body;
-    const {id: receiverId} = req.params;
+    const { message } = req.body;
+    const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
     let conversation = await Conversation.findOne({
-        participants: {$all: [senderId, receiverId]},
-  });
+      participants: { $all: [senderId, receiverId] },
+    });
 
-  if(!conversation){
-    conversation = await Conversation.create({
+    if (!conversation) {
+      conversation = await Conversation.create({
         participants: [senderId, receiverId],
-    })
-  }
-  const newMessage = new Message({
-    senderId,
-    receiverId,
-    message,
-  })
+      });
+    }
 
-  if(newMessage){
-    conversation.messages.push(newMessage._id);
-  }
+    const newMessage = new Message({
+      senderId,
+      receiverId,
+      message,
+    });
 
-  // this will run in parallel
-  await Promise.all([conversation.save(), newMessage.save()]);
+    if (newMessage) {
+      conversation.messages.push(newMessage._id);
+    }
+
+    // await conversation.save();
+    // await newMessage.save();
+
+    // this will run in parallel
+    await Promise.all([conversation.save(), newMessage.save()]);
 
     // SOCKET IO FUNCTIONALITY WILL GO HERE
     const receiverSocketId = getReceiverSocketId(receiverId);
@@ -46,37 +41,29 @@ export const sendMessage = async(req, res) => {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
 
-  res.status(201).json(newMessage);
-
+    res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sending message: ", error.message);
-    req.status(500).json({error: "Internal Server Error"});
-  }  
+    console.log("Error in sendMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
-/**
- * Gets all the messages for a conversation between two users
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- * @returns {Promise} A promise that resolves to a json response with the messages
- */
-export const getMessages = async(req, res) => {
+export const getMessages = async (req, res) => {
   try {
-    const {id:userToChatId} = req.params;
+    const { id: userToChatId } = req.params;
     const senderId = req.user._id;
 
     const conversation = await Conversation.findOne({
-        participants: {$all: [senderId, userToChatId]},
-    }).populate("messages");
+      participants: { $all: [senderId, userToChatId] },
+    }).populate("messages"); // NOT REFERENCE BUT ACTUAL MESSAGES
 
-    if(!conversation) return res.status(200).json([]);
+    if (!conversation) return res.status(200).json([]);
 
     const messages = conversation.messages;
 
     res.status(200).json(messages);
-
   } catch (error) {
-      console.log("Error in getting messages: ", error.message);
-      req.status(500).json({error: "Internal Server Error"});
+    console.log("Error in getMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
